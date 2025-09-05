@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Morse Blink Translator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <!-- Top row: Morse info -->
+    <div class="top-text" style="position: relative; text-align: center; margin-top: 20px;">
+        <h3><strong>Morse Sequence:</strong> <span id="morse-seq"></span></h3>
+        <h3><strong>Decoded Text:</strong> <span id="decoded-text"></span></h3>
+    </div>
+    
+    
+    
+
+    <!-- Middle row: Webcam + Chart -->
+    <div class="container">
+        <!-- Webcam -->
+        <div class="box">
+            <img id="webcam" src="{{ url_for('video_feed') }}" alt="Webcam Feed">
+        </div>
+
+        <!-- Chart -->
+        <div class="box">
+            <img id="chart" src="{{ url_for('static', filename='morse_chart.png') }}" alt="Morse Chart">
+        </div>
+    </div>
+
+    <!-- Bottom row: Buttons -->
+    <div class="buttons">
+        <button onclick="toggleWebcam()">Toggle Webcam</button>
+        <button onclick="toggleChart()">Toggle Chart</button>
+        <button onclick="clearText()">Clear Text</button>
+    </div>
+    
+    
+    <script>
+    const decodedTextEl = document.getElementById("decodedText");
+    const morseSequenceEl = document.getElementById("morseSequence");
+    const clearBtn = document.getElementById("clearBtn");
+    
+    // Poll the server every 150ms
+    setInterval(async () => {
+        try {
+            const response = await fetch("/decoded_text");
+            const data = await response.json();
+            decodedTextEl.textContent = data.text;
+            morseSequenceEl.textContent = data.sequence;
+        } catch (err) {
+            console.error(err);
+        }
+    }, 150);
+    
+    // Clear button only clears decoded text, not morse sequence
+    clearBtn.addEventListener("click", async () => {
+        try {
+            await fetch("/clear_text", { method: "POST" });
+            decodedTextEl.textContent = "";
+        } catch (err) {
+            console.error(err);
+        }
+    });
+    </script>
+    
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
